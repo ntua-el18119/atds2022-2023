@@ -4,7 +4,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import month,dayofmonth
 from pyspark.sql.functions import max, mean
 from pyspark.sql.functions import col, row_number
+import time
 # Start a Spark session
+start time.time()
 spark = SparkSession.builder.appName("TaxiTrips").getOrCreate()
 #schema = StructType([
  #   StructField("LocationID", IntegerType(), True),
@@ -13,7 +15,7 @@ spark = SparkSession.builder.appName("TaxiTrips").getOrCreate()
     #StructField("service_zone", StringType(), True)])
 #df2 = spark.read.schema(schema).csv("hdfs://master:9000/myfolder/taxi+_zone_lookup.csv",header=True,inferSchema=False)
 #df2 = spark.read.csv("hdfs://master:9000/myfolder/taxi+_zone_lookup.csv", header=True, inferSchema=True)
-df1 = spark.read.parquet("hdfs://master:9000/myfolder/taxi_trips/all_months_data.parquet")
+df1 = spark.read.parquet("hdfs://master:9000/myfolder/taxi_trips/all_final.parquet")
 #df1.show()
 df1.printSchema()
 new_df = df1.withColumn('Tip_percentage', df1.tip_amount*100/df1.fare_amount)
@@ -110,3 +112,6 @@ simpleData = [(df_jan_pday10,df_jan_pday11,df_feb_pday10,df_feb_pday11,df_mar_pd
 schema = ["January top 5 days","avg(Tip_percentage)","February top 5 days","avg(Tip_percentage)","March top 5 days","avg(Tip_percentage)","April top 5 days","avg(Tip_percentage)","May top 5 days","avg(Tip_percentage)","June top 5 days","avg(Tip_percentage)"]
 df = spark.createDataFrame(data=simpleData, schema = schema)
 df.show()
+end = time.time()
+print(end-start)
+df.write.csv("hdfs://master:9000/myfolder/q5_ouput.csv", header=True)
